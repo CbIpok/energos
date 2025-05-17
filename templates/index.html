@@ -1,0 +1,28 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Отзывы{% endblock %}
+{% block content %}
+<h2>Отзывы на энергетические напитки</h2>
+
+<form method="post">
+  <label>Введите одноразовый код для отправки отзыва:</label>
+  <input type="text" name="code" required>
+  <button type="submit">Проверить код</button>
+</form>
+
+<ul class="reviews">
+  {% for r in reviews %}
+  <li>
+    <strong>{{ r.username }} про {{ r.drink }}:</strong> {{ r.text }}<br>
+    Лайков: {{ likes_count[r.id] }}
+    {% if session.get('username') %}
+      <form method="post" action="{{ url_for('like', review_id=r.id) }}" style="display:inline;">
+        <button type="submit">👍</button>
+      </form>
+    {% else %}
+      <small>Чтобы лайкать, авторизуйтесь кодом.</small>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

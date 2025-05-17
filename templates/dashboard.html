@@ -1,0 +1,25 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Панель администратора{% endblock %}
+{% block content %}
+<h2>Генерация кода</h2>
+<form method="post" action="{{ url_for('admin_generate_code') }}">
+  {{ form.hidden_tag() }}
+  <p>{{ form.username.label }}<br>{{ form.username() }}</p>
+  <p>{{ form.drink.label }}<br>{{ form.drink() }}</p>
+  <p><button type="submit">Сгенерировать</button></p>
+</form>
+
+<h3>Список всех кодов</h3>
+<table>
+  <tr><th>Код</th><th>Пользователь</th><th>Напиток</th><th>Использован</th></tr>
+  {% for c in codes %}
+  <tr>
+    <td>{{ c.code }}</td>
+    <td>{{ c.username }}</td>
+    <td>{{ c.drink }}</td>
+    <td>{{ 'Да' if c.used else 'Нет' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

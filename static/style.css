@@ -1,0 +1,13 @@
+/* static/style.css */
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+nav { background: #333; color: #fff; padding: 10px; }
+nav a { color: #fff; margin-right: 10px; text-decoration: none; }
+.container { padding: 20px; }
+.flash { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+.flash.success { background: #e0ffe0; }
+.flash.danger { background: #ffe0e0; }
+.flash.warning { background: #fff0e0; }
+.reviews { list-style: none; padding: 0; }
+.reviews li { border-bottom: 1px solid #ccc; padding: 10px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
