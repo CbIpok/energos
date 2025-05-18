@@ -15,7 +15,7 @@
   <li>
     <strong>{{ r.username }} про {{ r.drink }}:</strong> {{ r.text }}<br>
     Лайков: {{ likes_count[r.id] }}
-    {% if session.get('username') %}
+    {% if session.get('code') %}
       <form method="post" action="{{ url_for('like', review_id=r.id) }}" style="display:inline;">
         <button type="submit">👍</button>
       </form>

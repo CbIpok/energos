@@ -74,8 +74,12 @@ def admin_generate_code():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # Получаем все отзывы
     reviews = Review.query.all()
+    # Считаем лайки для каждого отзыва
     likes_count = {r.id: Like.query.filter_by(review_id=r.id).count() for r in reviews}
+    # Сортируем отзывы по убыванию числа лайков
+    reviews.sort(key=lambda r: likes_count.get(r.id, 0), reverse=True)
 
     if request.method == 'POST':
         code_value = request.form.get('code')
@@ -84,6 +88,7 @@ def index():
             session['code'] = code.code
             session['username'] = code.username
             session['drink'] = code.drink
+            session['likes_used'] = 0
             return redirect(url_for('submit_review'))
         flash('Неверный или уже использованный код', 'danger')
 
@@ -104,34 +109,36 @@ def submit_review():
         code = Code.query.filter_by(code=session['code']).first()
         code.used = True
         db.session.commit()
-        # очищаем только код и drink, username остаётся для лайков
-        session.pop('code', None)
-        session.pop('drink', None)
+        session['likes_used'] = 0
         flash('Отзыв успешно отправлен!', 'success')
         return redirect(url_for('index'))
     return render_template('submit_review.html', form=form)
 
 @app.route('/like/<int:review_id>', methods=['POST'])
 def like(review_id):
-    username = session.get('username')
-    if not username:
+    code_str = session.get('code')
+    if not code_str:
         flash('Чтобы лайкать, сперва введите код участника', 'warning')
         return redirect(url_for('index'))
 
-    # проверяем, что пользователь ещё не ставил лайк
-    if Like.query.filter_by(username=username).first():
-        flash('Вы уже поставили лайк', 'warning')
+    code = Code.query.filter_by(code=code_str).first()
+    # нельзя лайкать один и тот же отзыв этим кодом дважды
+    if Like.query.filter_by(code_id=code.id, review_id=review_id).first():
+        flash('Вы уже лайкали этот отзыв', 'warning')
+    elif session.get('likes_used', 0) >= 1:
+        flash('Вы использовали свой лайк. Чтобы получить новый — оставьте отзыв.', 'warning')
     else:
         review = Review.query.get_or_404(review_id)
-        if review.username == username:
+        if review.username == session['username']:
             flash('Нельзя лайкать собственный отзыв', 'warning')
         else:
-            like_obj = Like(review_id=review_id, username=username)
+            like_obj = Like(review_id=review_id, code_id=code.id, username=session['username'])
             db.session.add(like_obj)
             db.session.commit()
+            session['likes_used'] = session.get('likes_used', 0) + 1
             flash('Лайк учтён', 'success')
 
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
